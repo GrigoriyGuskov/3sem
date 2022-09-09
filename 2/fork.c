@@ -20,13 +20,11 @@ int main() {
 		pid = getpid();
 	
 		printf("I'm child\nppid = %d\npid = %d\n", ppid, pid);
-	}
-	
-	if(f) {			//parent
+	} else {			//parent
 		ppid = getppid();
 		pid = getpid();
 	
-		printf("I'm parent\nppid = %d\npid = %d\n", ppid, pid);
+		printf("I'm parent\nppid = %d\npid = %d\nid of my child: %d\n", ppid, pid, f);
 	}
 	
 	
