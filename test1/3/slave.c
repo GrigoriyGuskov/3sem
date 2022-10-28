@@ -11,31 +11,45 @@ int main() {
 	
 	int d = msgget(key, 0777 | IPC_CREAT);
 	
+	int pid;
+	
 	struct msgbuf mes;
 	mes.mtype = 0;
 	
-	struct msginf info;
-
-	msgrcv(d, &info, sizeof(int), INFO, 0);
+	char ** argv = calloc(5, sizeof(char*));
+	char * res = NULL;
 	
-	int n = info.n;
-	
-	char ** argv = calloc(n, sizeof(char*));
-
-
-	for (int j = 0; mes.mtype != EXIT; ++j) {
+	for (; mes.mtype != EXIT; ) {
+		
 		for(int i  = 0; i < 21; ++i)
 			mes.data[i] = '\0';
+		
 		int size = msgrcv(d, &mes, 20 * sizeof(char), 0, 0);
+		
 		if (size > 0) {
-			argv[j] = calloc(size + 1, sizeof(char));
-			strncpy(argv[j], mes.data, size);
+			res = strtok(mes.data, " 	\n");
+			
+			for(int j = 0; res; ++j) {
+				argv[j] = calloc(strlen(res) + 1, sizeof(char));
+				strcpy(argv[j], res);
+				res = strtok(NULL, " 	\n");
+			}
+			
+			pid = fork();
+			if(pid == 0)
+				execvp(argv[0], argv);
+			for(int i = 0; i < 5; ++i) {
+				free(argv[i]);
+				argv[i] = NULL;
+			}
 		}
+		
 	}
-	if(n > 0)
-		execvp(argv[0],  argv);
+	
 	
 	msgctl(d, IPC_RMID, NULL);
+	
+	free(argv);
 	
 	return 0;
 }
